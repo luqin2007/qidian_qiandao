@@ -1,13 +1,27 @@
 // 初始化
 console.show();
 auto.waitFor();
+let textView;
 
 // 启动起点
 app.launchPackage('com.qidian.QDReader');
 waitForPackage('com.qidian.QDReader');
 waitForActivity('com.qidian.QDReader.ui.activity.MainGroupActivity');
-waitView("书架");
+waitView("书架").click();
 log("应用已识别");
+
+// #region 签到
+log("签到 开始");
+while (textContains("登录领奖").exists()) {
+    log("  等待登录状态...");
+    sleep(500);
+}
+if (textView = findView("签到")) {
+    clickButton(textView);
+    back();
+}
+log("签到 结束");
+// #endregion
 
 // 我 - 福利中心
 clickButton(findView("我"));
@@ -15,43 +29,18 @@ clickButton(waitView("福利中心"));
 waitForActivity("com.qidian.QDReader.ui.activity.QDBrowserActivity");
 waitView("限时彩蛋");
 
-log("每日福利");
-let textView;
-
-// #region 免费开宝箱
-log("免费开宝箱");
-if (textView = findView("免费开宝箱")) {
-    clickButton(textView);
-}
-if (textView = findView("看视频可再抽一次")){
+// #region 每日福利
+log("每日福利 开始");
+while ((textView = findView("看第\\d+个视频", "match")) 
+ || (textView = findView("看视频领福利")) 
+ || (textView = findView("看视频开宝箱"))) {
     clickButton(textView);
     watchAds();
-    sleep(1000);
-} else if (textView = findView("我知道了")){
-    clickButton(textView);
-    sleep(1000);
 }
+log("每日福利 结束");
 // #endregion
 
-// #region 看视频开宝箱
-log("看视频开宝箱");
-if (textView = findView("看视频开宝箱")) {
-    clickButton(textView);
-    watchAds();
-    sleep(3000);
-}
-// #endregion
-
-// 每日视频
-log("每日视频 开始");
-while ((textView = findView("看第\\d+个视频", "match")) || (textView = findView("看视频领福利"))){
-    clickButton(textView);
-    watchAds();
-    sleep(3000);
-}
-log("每日视频 结束");
-
-// 限时彩蛋
+// #region 限时彩蛋
 log("限时彩蛋 开始");
 while(textView = findView("看视频")) {
     clickButton(textView);
@@ -59,59 +48,61 @@ while(textView = findView("看视频")) {
     sleep(1000);
 }
 log("限时彩蛋 结束");
+// #endregion
+
 
 // 玩游戏
-log("玩游戏 开始");
-if ((textView = findView("当日玩游戏\\d+分钟", "match"))) {
-    let layout = textView.parent();
-    textView = layout.findOne(text("去完成"));
-    if (textView) {
-        // 计算剩余时间
-        let text = layout.findOne(textMatches("\\d+/\\d+分钟"));
-        if (text) {
-            text = text.text();
-            let result = text.match("(\\d+)/(\\d+)分钟");
-            let gameTimes = parseInt(result[1]);
-            let allTime = parseInt(result[2]);
-            let playMinutes = Math.max(allTime - gameTimes, 1);
-            // 玩游戏
-            clickButton(findView("去完成"));
-            waitForActivity("com.qidian.QDReader.ui.activity.QDBrowserActivity");
-            clickButton(waitView("新游"));
-            waitForActivity("com.qidian.QDReader.ui.activity.GameBrowserActivity");
-            clickButton(waitView("在线玩"));
-            sleep(1000);
-            log("保持屏幕常亮");
-            device.keepScreenDim();
-            for (let i = playMinutes + 1; i > 0; --i) {
-                log(`剩余 ${i}min`);
-                sleep(66000);
-                device.wakeUpIfNeeded();
-            }
-            log("停止屏幕常亮，游戏挂机结束");
-            device.cancelKeepingAwake();
-            device.vibrate(500);
-            // 游戏页(无标题) - 新游 - 游戏中心 - 福利中心
-            while (true) {
-                if (findView("福利中心")) {
-                    break;
-                }
-                back();
-                sleep(1000);
-            }
-        }
-    }
-}
-log("玩游戏 结束");
+// log("玩游戏 开始");
+// if ((textView = findView("当日玩游戏\\d+分钟", "match"))) {
+//     let layout = textView.parent();
+//     textView = layout.findOne(text("去完成"));
+//     if (textView) {
+//         // 计算剩余时间
+//         let text = layout.findOne(textMatches("\\d+/\\d+分钟"));
+//         if (text) {
+//             text = text.text();
+//             let result = text.match("(\\d+)/(\\d+)分钟");
+//             let gameTimes = parseInt(result[1]);
+//             let allTime = parseInt(result[2]);
+//             let playMinutes = Math.max(allTime - gameTimes, 1);
+//             // 玩游戏
+//             clickButton(findView("去完成"));
+//             waitForActivity("com.qidian.QDReader.ui.activity.QDBrowserActivity");
+//             clickButton(waitView("新游"));
+//             waitForActivity("com.qidian.QDReader.ui.activity.GameBrowserActivity");
+//             clickButton(waitView("在线玩"));
+//             sleep(1000);
+//             log("保持屏幕常亮");
+//             device.keepScreenDim();
+//             for (let i = playMinutes + 1; i > 0; --i) {
+//                 log(`剩余 ${i}min`);
+//                 sleep(66000);
+//                 device.wakeUpIfNeeded();
+//             }
+//             log("停止屏幕常亮，游戏挂机结束");
+//             device.cancelKeepingAwake();
+//             device.vibrate(500);
+//             // 游戏页(无标题) - 新游 - 游戏中心 - 福利中心
+//             while (true) {
+//                 if (findView("福利中心")) {
+//                     break;
+//                 }
+//                 back();
+//                 sleep(1000);
+//             }
+//         }
+//     }
+// }
+// log("玩游戏 结束");
 
 // 领奖励
 log("领奖励 开始");
 while(textView = findView("领奖励")) {
     clickButton(textView);
     sleep(1000);
-        if (textView = findView("我知道了")) {
-            clickButton(textView);
-        }
+    if (textView = findView("我知道了")) {
+        clickButton(textView);
+    }
 }
 log("领奖励 结束");
 
@@ -120,39 +111,54 @@ log("返回书架");
 back();
 waitForActivity('com.qidian.QDReader.ui.activity.MainGroupActivity');
 clickButton(waitView("书架"));
+
 log("运行结束");
 sleep(5000);
 console.hide();
 
-// ==================================================================
+// region 
 
 /**
  * 查找带有某个文本的控件
  * @param {string} content 查找文本
- * @param {string} mode 查找方式，默认 text，可选 match
+ * @param {string} mode 查找方式，详见 findViewBy
  * @returns 第一个符合条件的控件，不存在返回 undefined
  */
 function findView(content, mode) {
     log(`查找控件 ${content}`);
-    let find;
-    if (mode === 'match') {
-        find = textMatches(content);
-    } else {
-        find = text(content);
-    }
+    let find = findViewBy(content, mode);
     return find && find.exists() ? find.findOnce() : undefined;
 }
 
 /**
  * 查找带有某个文本的控件
  * @param {string} content 查找文本
+ * @param {string} mode 查找方式，详见 findViewBy
  * @returns 第一个符合条件的控件
  */
-function waitView(content) {
+function waitView(content, mode) {
     log(`等待控件 ${content}`);
-    let view = text(content);
+    let view = findViewBy(content, mode);
     view.waitFor();
     return view.findOnce();
+}
+
+/**
+ * 查找控件
+ * @param {string} content 查找文本 
+ * @param {string} mode 查找方式，默认 text，可选 match，id
+ * @returns selector 
+ */
+function findViewBy(content, mode) {
+    let find;
+    if (mode === 'match') {
+        find = textMatches(content);
+    } else if (mode === 'id') {
+        find = id(content)
+    } else {
+        find = text(content);
+    }
+    return find;
 }
 
 /**
@@ -180,76 +186,40 @@ function clickButton(view) {
  * @returns 是否播放完成
  */
 function watchAds() {
-    waitForActivity("com.qq.e.tg.RewardvideoPortraitADActivity");
-    className("android.widget.Image").waitFor();
-    sleep(1000);
-    let skip = false;
-    // 加载广告
-    let sleepTime = 0;
-    let loop = 0;
-    while (!skip && sleepTime === 0) {
-        if (findView("观看视频15秒后，可获得奖励")) {
-            sleepTime = 16;
-            log("预览 15s");
-        } else if (findView("观看视频30秒后，可获得奖励")) {
-            sleepTime = 31;
-            log("预览 30s");
-        } else if (findView("观看完视频，可获得奖励")) {
-            let adLength = NaN;
-            let views = className("android.view.View").find();
-            for (let i = 0; i < views.size(); ++i) {
-                adLength = parseInt(views.get(i).text());
-                if (!isNaN(adLength)) break;
-            }
-            if (isNaN(adLength) || adLength < 3) {
-                log("广告长度读取失败，即将重新查看")
-                skip = true;
-            } else {
-                log(`广告预览 ${adLength + 1}s`)
-                sleepTime = adLength + 1;
-            }
-        }else {
-            loop++;
-            if (loop === 50) {
-                break;
-            }
+    const regex = /观看视频(\d+)秒后，可获得奖励/
+
+    className("ImageView").waitFor();
+    id("android:id/navigationBarBackground").waitFor();
+    sleep(5000);
+    if (textView = findView("观看视频\\d+秒后，可获得奖励", 'match')) {
+        let adTime = 45; // 应该不会有比 45s 更长的广告了吧
+        let m = regex.exec(textView.text());
+        if (m && m.length > 1) {
+            adTime = m[1];
         }
-    }
-    if (!skip) {
-        sleep(sleepTime * 1000);
-    }
-    // 关闭广告
-    let view = className("com.tencent.tbs.core.webkit.WebView");
-    if (view && view.exists()) {
-        let closeImg = view.findOnce().find(className("android.widget.Image"));
-        if (closeImg && closeImg.size() > 0) {
-            closeImg = closeImg.get(0);
-            // 最后一串 [] 内数据如何获取。。。
-            // while (closeImg && !toString(closeImg).includes("ACTION_CLICK")) {
-            //     closeImg = closeImg.parent();
-            // }
-            // if (closeImg) {
-            //     closeImg.click();
-            // } else {
-            //     log("Error: 找不到关闭按钮点击区域");
-            // }
-            closeImg.click();
-            closeImg.parent().click();
-            closeImg.parent().parent().click();
-            
-            if (skip) {
-                clickButton(waitView("跳过视频"));
-                return false;
-            }
+        log(`广告时间：${adTime}+1s`);
+        sleep(adTime * 1000);
+        sleep(1000); // 额外休眠 1s
+    } else if (textView = findView("观看完视频，可获得奖励")) {
+        while (findView("跳过广告")) {
+            sleep(1000);
         }
-    }
-    sleep(1000);
-    if (textView = findView("我知道了")) {
+    } else if (textView = findView("跳过视频")) {
         clickButton(textView);
+    }
+    // 结束
+    if (textView = findView("跳过广告")) {
+        clickButton(textView);
+    } else {
+        let closeButton = className("ImageView").filter(o => o.clickable()).findOnce();
+        if (closeButton) closeButton.click();
+        else return false;
     }
     log("广告已结束")
     return true;
 }
+
+// #region Debug
 
 /**
  * 在控制台输出某个视图及所有子视图
@@ -268,6 +238,10 @@ function logView(view, level) {
  * @param {UiObject} child 内部任意一个子视图
  */
 function logRootView(child) {
+    if (!child) {
+        child = classNameContains("").findOnce()
+    }
+
     let pl = 0;
     let pv = child.parent();
     while (pv) {
@@ -278,3 +252,5 @@ function logRootView(child) {
     log(pl);
     logView(child, 0);
 }
+
+// #endregion
