@@ -21,6 +21,7 @@ while (textContains("登录领奖").exists()) {
 }
 if (textView = findView("签到")) {
     clickButton(textView);
+    sleep(1000);
     back();
 }
 log("签到 结束");
@@ -38,7 +39,11 @@ while ((textView = findView("看第\\d+个视频", "match"))
  || (textView = findView("看视频领福利")) 
  || (textView = findView("看视频开宝箱"))) {
     clickButton(textView);
-    watchAds();
+    if (watchAds()) {
+        sleep(500);
+        clickButton(waitView("我知道了"));
+    }
+    sleep(500);
 }
 log("每日福利 结束");
 // #endregion
@@ -102,6 +107,7 @@ if (textView = findView("当日玩游戏10分钟")) {
         }
     }
 }
+sleep(1000);
 log("玩游戏 结束");
 // #endregion
 
@@ -221,6 +227,8 @@ function watchAds() {
         while (findView("跳过广告")) sleep(1000);
     } else if (textView = findView("跳过视频")) {
         clickButton(textView);
+        log("广告观看失败");
+        return false;
     }
     // 结束
     if (textView = findView("跳过广告")) {
