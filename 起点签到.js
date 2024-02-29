@@ -39,10 +39,7 @@ while ((textView = findView("看第\\d+个视频", "match"))
  || (textView = findView("看视频领福利")) 
  || (textView = findView("看视频开宝箱"))) {
     clickButton(textView);
-    if (watchAds()) {
-        sleep(500);
-        clickButton(waitView("我知道了"));
-    }
+    watchAds();
     sleep(500);
 }
 log("每日福利 结束");
@@ -237,6 +234,11 @@ function watchAds() {
         let closeButton = className("ImageView").filter(o => o.clickable()).findOnce();
         if (closeButton) closeButton.click();
         else return false;
+    }
+    // 等待 我知道了
+    sleep(1000);
+    if (textView = findView("我知道了")) {
+        clickButton(textView);
     }
     log("广告已结束")
     return true;
