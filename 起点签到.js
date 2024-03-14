@@ -231,6 +231,12 @@ function watchAds() {
             return false;
         }
         sleep(500);
+        times++;
+        if (times > 100) {
+            device.vibrate(500);
+            log("广告识别出现问题, 请检查是否正常继续进行");
+            return false;
+        }
     }
     // 结束
     if (textView = findView("跳过广告")) {
