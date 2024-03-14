@@ -79,7 +79,6 @@ if (textView = findView("当日玩游戏10分钟")) {
         textView = views[views.length - 2];
 
         let gameTimes = parseInt(textView.text());
-        log(textView.text());
         let playMinutes = Math.max(10 - gameTimes, 1);
         log(playMinutes);
         // 玩游戏
@@ -210,22 +209,28 @@ function clickButton(view) {
  * @returns 是否播放完成
  */
 function watchAds() {
-    className("ImageView").waitFor();
-    id("android:id/navigationBarBackground").waitFor();
-    sleep(5000);
-    if (textView = findView("观看视频\\d+秒后，可获得奖励", 'match')) {
-        let adTime = findValueFromString(textView.text(), regex_ad);
-        // 应该不会有比 45s 更长的广告了吧
-        adTime = adTime ? adTime[1] : 45;
-        log(`广告时间：${adTime}+1s`);
-        sleep(adTime * 1000);
-        sleep(1000); // 额外休眠 1s
-    } else if (textView = findView("观看完视频，可获得奖励")) {
-        while (findView("跳过广告")) sleep(1000);
-    } else if (textView = findView("跳过视频")) {
-        clickButton(textView);
-        log("广告观看失败");
-        return false;
+    let times = 0;
+    while (true) {
+        log("等待广告中 " + times.toString());
+        if (textView = findView("观看视频\\d+秒后，可获得奖励", 'match')) {
+            let adTime = findValueFromString(textView.text(), regex_ad);
+            // 应该不会有比 45s 更长的广告了吧
+            adTime = adTime ? adTime[1] : 45;
+            log(`广告时间：${adTime}+1s`);
+            sleep(adTime * 1000);
+            sleep(1000); // 额外休眠 1s
+            break;
+        } else if (textView = findView("观看完视频，可获得奖励")) {
+            while ((textView = findView("跳过广告"))) {
+                sleep(1000);
+            }
+            break;
+        } else if (textView = findView("跳过视频")) {
+            clickButton(textView);
+            log("广告观看失败");
+            return false;
+        }
+        sleep(500);
     }
     // 结束
     if (textView = findView("跳过广告")) {
