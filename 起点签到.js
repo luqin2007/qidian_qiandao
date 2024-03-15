@@ -216,9 +216,9 @@ function watchAds() {
             let adTime = findValueFromString(textView.text(), regex_ad);
             // 应该不会有比 45s 更长的广告了吧
             adTime = adTime ? adTime[1] : 45;
-            log(`广告时间：${adTime}+1s`);
+            log(`广告时间：${adTime}+3s`);
             sleep(adTime * 1000);
-            sleep(1000); // 额外休眠 1s
+            sleep(3000); // 额外休眠 3s
             break;
         } else if (textView = findView("观看完视频，可获得奖励")) {
             while ((textView = findView("跳过广告"))) {
