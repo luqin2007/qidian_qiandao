@@ -2,7 +2,8 @@
 console.show();
 auto.waitFor();
 
-const regex_ad = /观看视频(\d+)秒后，可获得奖励/
+const regex_ad_1 = /观看视频(\d+)秒后，可获得奖励/
+const regex_ad_2 = /收听(\d+)秒有声书可获得奖励/
 const regex_game = /(\d+)\/(\d+)分钟/
 let textView;
 
@@ -210,12 +211,22 @@ function clickButton(view) {
  */
 function watchAds() {
     let times = 0;
+    let adType = 0;
     while (true) {
         log("等待广告中 " + times.toString());
         if (textView = findView("观看视频\\d+秒后，可获得奖励", 'match')) {
-            let adTime = findValueFromString(textView.text(), regex_ad);
+            let adTime = findValueFromString(textView.text(), regex_ad_1);
             // 应该不会有比 45s 更长的广告了吧
             adTime = adTime ? adTime[1] : 45;
+            log(`广告时间：${adTime}+3s`);
+            sleep(adTime * 1000);
+            sleep(3000); // 额外休眠 3s
+            break;
+        } else if (textView = findView("收听\\d+秒有声书可获得奖励", 'match')) {
+            let adTime = findValueFromString(textView.text(), regex_ad_2);
+            adType = 1;
+            // 这个一般就十几秒，取 20s
+            adTime = adTime ? adTime[1] : 20;
             log(`广告时间：${adTime}+3s`);
             sleep(adTime * 1000);
             sleep(3000); // 额外休眠 3s
@@ -239,7 +250,9 @@ function watchAds() {
         }
     }
     // 结束
-    if (textView = findView("跳过广告")) {
+    if (adType == 1) {
+        className('Button').text('').findOne().click();
+    } else if (textView = findView("跳过广告")) {
         clickButton(textView);
     } else {
         let closeButton = className("ImageView").filter(o => o.clickable()).findOnce();
