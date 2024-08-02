@@ -259,8 +259,10 @@ function watchAds() {
                 webView = webView.children()[0]
             }
             clickButton(webView)
+            clickButton(findView("我"));
             clickButton(waitView("福利中心"));
             waitForActivity("com.qidian.QDReader.ui.activity.QDBrowserActivity");
+            waitView("限时彩蛋");
         } else {
             className('Button').text('').findOne().click();
         }
