@@ -175,7 +175,9 @@ function waitView(content, mode) {
  */
 function findViewBy(content, mode) {
     let find;
-    if (mode === 'match') {
+    if (mode === 'class') {
+        find = className(content)
+    } else if (mode === 'match') {
         find = textMatches(content);
     } else if (mode === 'id') {
         find = id(content)
@@ -243,15 +245,25 @@ function watchAds() {
         }
         sleep(500);
         times++;
-        if (times > 100) {
-            device.vibrate(500);
+        if (times > 50) {
+            device.vibrate(300);
             log("广告识别出现问题, 请检查是否正常继续进行");
             return false;
         }
     }
     // 结束
     if (adType == 1) {
-        className('Button').text('').findOne().click();
+        let webView = findView('com.tencent.tbs.core.webkit.WebView', 'class')
+        if (webView) {
+            while (!webView.children().isEmpty()) {
+                webView = webView.children()[0]
+            }
+            clickButton(webView)
+            clickButton(waitView("福利中心"));
+            waitForActivity("com.qidian.QDReader.ui.activity.QDBrowserActivity");
+        } else {
+            className('Button').text('').findOne().click();
+        }
     } else if (textView = findView("跳过广告")) {
         clickButton(textView);
     } else {
