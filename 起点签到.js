@@ -28,8 +28,12 @@ if (textView = findView("签到")) {
 log("签到 结束");
 // #endregion
 
-// 我 - 福利中心
+// 我 [- 青少年模式] - 福利中心
 clickButton(findView("我"));
+sleep(1000)
+if (textView = findView('我知道了')) {
+    clickButton(textView)
+}
 clickButton(waitView("福利中心"));
 waitForActivity("com.qidian.QDReader.ui.activity.QDBrowserActivity");
 waitView("限时彩蛋");
@@ -230,6 +234,11 @@ function watchAds() {
             // 这个一般就十几秒，取 20s
             adTime = adTime ? adTime[1] : 20;
             log(`广告时间：${adTime}+3s`);
+            // 有些广告默认暂停
+            if (textView = findView('')) {
+                log("开始播放");
+                clickButton(textView)
+            }
             sleep(adTime * 1000);
             sleep(3000); // 额外休眠 3s
             break;
@@ -253,16 +262,18 @@ function watchAds() {
     }
     // 结束
     if (adType == 1) {
-        let webView = findView('com.tencent.tbs.core.webkit.WebView', 'class')
-        if (webView) {
-            while (!webView.children().isEmpty()) {
-                webView = webView.children()[0]
+        let adView = findView('com.tencent.tbs.core.webkit.WebView', 'class')
+        if (adView) {
+            while (!adView.children().isEmpty()) {
+                adView = adView.children()[0]
             }
-            clickButton(webView)
+            clickButton(adView)
             clickButton(findView("我"));
             clickButton(waitView("福利中心"));
             waitForActivity("com.qidian.QDReader.ui.activity.QDBrowserActivity");
             waitView("限时彩蛋");
+        } else if (adView = findView('')) {
+            clickButton(adView)
         } else {
             className('Button').text('').findOne().click();
         }

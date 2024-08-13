@@ -118,8 +118,5 @@ function clickButton(view) {
 }
 
 // logRootView()
-let webView = findView('com.tencent.tbs.core.webkit.WebView', 'class')
-while (!webView.children().isEmpty()) {
-    webView = webView.children()[0]
-}
-clickButton(webView)
+
+clickButton(findView(''))
